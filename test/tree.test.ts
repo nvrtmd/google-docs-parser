@@ -122,7 +122,6 @@ describe("createNodeFromTitle", () => {
 describe("parseTreeSection", () => {
   const dummySchema: ParseSchema = { sections: [] };
 
-  // Helper to setup common test data
   const createTreeSection = (node: Node): Section => ({
     title: { name: "Root", namedStyleType: "HEADING_2" },
     content: { kind: "tree", node },
@@ -130,7 +129,6 @@ describe("parseTreeSection", () => {
 
   it("should parse a simple 1-level tree (Heading -> List Content)", () => {
     // Arrange
-    // Schema: H3 -> List
     const section = createTreeSection({
       title: { namedStyleType: "HEADING_3" },
       content: { kind: "list" },
@@ -159,13 +157,12 @@ describe("parseTreeSection", () => {
 
   it("should parse a nested 2-level tree (H3 -> H4 -> List Content)", () => {
     // Arrange
-    // Schema: H3 -> H4 -> List
     const section = createTreeSection({
-      title: { namedStyleType: "HEADING_3" }, // Parent
+      title: { namedStyleType: "HEADING_3" },
       content: {
         kind: "tree",
         node: {
-          title: { namedStyleType: "HEADING_4" }, // Child
+          title: { namedStyleType: "HEADING_4" },
           content: { kind: "list" },
         },
       },
@@ -179,7 +176,7 @@ describe("parseTreeSection", () => {
         .paragraph,
       createMockParagraph({ text: "Detail 1" }).paragraph,
       createMockParagraph({ text: "Parent B", namedStyleType: "HEADING_3" })
-        .paragraph, // New Parent
+        .paragraph,
       createMockParagraph({ text: "Child B-1", namedStyleType: "HEADING_4" })
         .paragraph,
     ];
@@ -210,7 +207,7 @@ describe("parseTreeSection", () => {
     const allStyles = new Set<NamedStyleType>(["HEADING_3"]);
 
     const paragraphs = [
-      createMockParagraph({ text: "Orphan Text" }).paragraph, // Should be ignored
+      createMockParagraph({ text: "Orphan Text" }).paragraph,
       createMockParagraph({ text: "Root Node", namedStyleType: "HEADING_3" })
         .paragraph,
       createMockParagraph({ text: "Valid Content" }).paragraph,
@@ -269,7 +266,7 @@ describe("parseTreeSection - Termination & Rules", () => {
       createMockParagraph({ text: "Node 1", namedStyleType: "HEADING_3" })
         .paragraph,
       createMockParagraph({ text: "Next", namedStyleType: "HEADING_2" })
-        .paragraph, // Boundary
+        .paragraph,
     ];
     const cursor = new ParagraphCursor(paragraphs, parseSchemaWithNext);
 
@@ -288,7 +285,6 @@ describe("parseTreeSection - Termination & Rules", () => {
         .paragraph,
       createMockParagraph({ text: "Child 1", namedStyleType: "HEADING_4" })
         .paragraph,
-      // Sibling Parent appears -> Close Child 1, Close Parent 1
       createMockParagraph({ text: "Parent 2", namedStyleType: "HEADING_3" })
         .paragraph,
     ];
@@ -312,12 +308,11 @@ describe("parseTreeSection - Termination & Rules", () => {
 
   it("should ignore direct text content if the node expects children (strict nesting)", () => {
     // Arrange
-    // H3 expects H4 children (kind: "tree"), NOT text list
     const section = createH3H4Section();
     const paragraphs = [
       createMockParagraph({ text: "Parent", namedStyleType: "HEADING_3" })
         .paragraph,
-      createMockParagraph({ text: "Invalid Text" }).paragraph, // Should be ignored
+      createMockParagraph({ text: "Invalid Text" }).paragraph,
       createMockParagraph({ text: "Child", namedStyleType: "HEADING_4" })
         .paragraph,
     ];
@@ -330,22 +325,19 @@ describe("parseTreeSection - Termination & Rules", () => {
     expect(result).toEqual([
       {
         title: "Parent",
-        content: [
-          // "Invalid Text" is gone because parent expects a tree, not a list
-          { title: "Child", content: [] },
-        ],
+        content: [{ title: "Child", content: [] }],
       },
     ]);
   });
 
   it("should stop parsing if an undefined heading style (e.g., H5) is encountered", () => {
     // Arrange
-    const section = createH3H4Section(); // Allows H3, H4
+    const section = createH3H4Section();
     const paragraphs = [
       createMockParagraph({ text: "Parent", namedStyleType: "HEADING_3" })
         .paragraph,
       createMockParagraph({ text: "Unexpected", namedStyleType: "HEADING_5" })
-        .paragraph, // Error boundary
+        .paragraph,
     ];
     const cursor = new ParagraphCursor(paragraphs, dummySchema);
 

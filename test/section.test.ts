@@ -36,7 +36,6 @@ describe("getSectionTitle", () => {
         { title: { name: "Experience", namedStyleType: "HEADING_2" } },
       ],
     };
-    // Input is lowercase 'experience'
     const paragraph = createMockParagraph({
       text: "experience",
       namedStyleType: "HEADING_2",
@@ -45,7 +44,7 @@ describe("getSectionTitle", () => {
     // Act
     const result = getSectionTitle(paragraph, "experience", schema);
 
-    // Assert: Returns the canonical name defined in schema
+    // Assert
     expect(result).toBe("Experience");
   });
 
@@ -90,7 +89,7 @@ describe("getSectionTitle", () => {
     };
     const paragraph = createMockParagraph({
       text: "Education",
-      namedStyleType: "HEADING_1", // Different Style
+      namedStyleType: "HEADING_1",
     }).paragraph;
 
     // Act
@@ -119,9 +118,9 @@ describe("getSectionTitle", () => {
     // Arrange
     const schema: ParseSchema = {
       sections: [
-        { title: { namedStyleType: "HEADING_2" } }, // Missing name
+        { title: { namedStyleType: "HEADING_2" } },
         // @ts-ignore: Intentionally invalid type
-        { title: { name: "NoStyle" } }, // Missing style
+        { title: { name: "NoStyle" } },
       ],
     };
     const paragraph = createMockParagraph({
@@ -172,7 +171,6 @@ describe("parseSectionContent", () => {
     // Arrange
     const section: Section = {
       title: { name: "Summary", namedStyleType: "HEADING_2" },
-      // content is missing -> implies TextBlock
     };
     const paragraphs = [
       createMockParagraph({ text: "Line 1" }).paragraph,
@@ -183,7 +181,7 @@ describe("parseSectionContent", () => {
     // Act
     const result = parseSectionContent(cursor, section);
 
-    // Assert: TextBlock parser joins lines with space
+    // Assert
     expect(result).toBe("Line 1 Line 2");
   });
 
@@ -201,7 +199,7 @@ describe("parseSectionContent", () => {
     // Act
     const result = parseSectionContent(cursor, section);
 
-    // Assert: List parser handles flattening
+    // Assert
     expect(result).toEqual(["React", "Vue", "Angular"]);
   });
 
@@ -224,7 +222,7 @@ describe("parseSectionContent", () => {
     // Act
     const result = parseSectionContent(cursor, section);
 
-    // Assert: Tree parser returns an array of nodes
+    // Assert
     expect(Array.isArray(result)).toBe(true);
     expect((result as unknown[]).length).toBe(1);
     expect((result as unknown[])[0]).toEqual({
@@ -258,7 +256,6 @@ describe("parseSectionContent", () => {
     // Arrange
     const section: Section = {
       title: { name: "Broken", namedStyleType: "HEADING_2" },
-      // Tree defined but 'node' property missing
       content: { kind: "tree" } as any,
     };
     const paragraphs = [createMockParagraph({ text: "Some text" }).paragraph];
@@ -267,7 +264,7 @@ describe("parseSectionContent", () => {
     // Act
     const result = parseSectionContent(cursor, section);
 
-    // Assert: Safe fallback to empty array
+    // Assert
     expect(result).toEqual([]);
   });
 });

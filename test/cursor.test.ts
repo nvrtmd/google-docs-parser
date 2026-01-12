@@ -37,7 +37,6 @@ describe("getParagraph", () => {
     const MOCK_TEXT = "No Style Text";
     const rawParagraph: docs_v1.Schema$Paragraph = {
       elements: [{ textRun: { content: MOCK_TEXT } }],
-      // paragraphStyle property is missing
     };
 
     // Act
@@ -94,11 +93,9 @@ describe("ParagraphCursor - Navigation", () => {
   it("should advance to the next paragraph sequentially", () => {
     const cursor = new ParagraphCursor(simpleParagraphs, MOCK_SCHEMA);
 
-    // 1 -> 2 -> 3 -> End
     expect(cursor.getNextParagraph()?.text).toBe("Line 2");
     expect(cursor.getNextParagraph()?.text).toBe("Line 3");
 
-    // Check End of Document
     expect(cursor.getNextParagraph()).toBeNull();
     expect(cursor.isEndOfDocument()).toBe(true);
   });
@@ -115,12 +112,10 @@ describe("ParagraphCursor - Navigation", () => {
     // Act & Assert
     expect(cursor.getCurrentParagraph()?.text).toBe("Start");
 
-    // Move to empty line (returns null, but index moves forward)
     const emptyStep = cursor.getNextParagraph();
     expect(emptyStep).toBeNull();
     expect(cursor.isEndOfDocument()).toBe(false);
 
-    // Move to next valid line
     const finalStep = cursor.getNextParagraph();
     expect(finalStep?.text).toBe("End");
   });
@@ -128,11 +123,9 @@ describe("ParagraphCursor - Navigation", () => {
   it("should remain idempotent when calling getCurrentParagraph multiple times", () => {
     const cursor = new ParagraphCursor(simpleParagraphs, MOCK_SCHEMA);
 
-    // Multiple reads should not advance the cursor
     expect(cursor.getCurrentParagraph()?.text).toBe("Line 1");
     expect(cursor.getCurrentParagraph()?.text).toBe("Line 1");
 
-    // Advancement should still work correctly
     expect(cursor.getNextParagraph()?.text).toBe("Line 2");
   });
 });
@@ -172,10 +165,8 @@ describe("ParagraphCursor - Edge Cases", () => {
     // Act & Assert
     expect(cursor.getCurrentParagraph()?.text).toBe("Last Valid");
 
-    // Move to last (empty) -> returns null, index at end
     expect(cursor.getNextParagraph()).toBeNull();
 
-    // Move out of bounds
     expect(cursor.getNextParagraph()).toBeNull();
     expect(cursor.isEndOfDocument()).toBe(true);
   });
@@ -256,7 +247,6 @@ describe("ParagraphCursor - Context Analysis", () => {
     });
 
     it("should detect a new section case-insensitively", () => {
-      // Schema: "Experience", Doc: "EXPERIENCE"
       const caseMismatchElement = createMockParagraph({
         text: "EXPERIENCE",
         namedStyleType: "HEADING_2",
@@ -271,7 +261,6 @@ describe("ParagraphCursor - Context Analysis", () => {
     });
 
     it("should NOT detect if style matches but content is not in schema (Content Mismatch)", () => {
-      // Style is HEADING_2 (Match), but "Education" is not in schema
       const contentMismatchElement = createMockParagraph({
         text: "Education",
         namedStyleType: "HEADING_2",
@@ -283,12 +272,10 @@ describe("ParagraphCursor - Context Analysis", () => {
 
       expect(cursor.isAtNewSection()).toBe(false);
       expect(cursor.getCurrentSectionTitle()).toBeNull();
-      // It is still a heading, just not a target section
       expect(cursor.isAtParagraphHeading()).toBe(true);
     });
 
     it("should NOT detect if content matches but style is wrong (Style Mismatch)", () => {
-      // Text is "Experience" (Match), but style is NORMAL_TEXT
       const styleMismatchElement = createMockParagraph({
         text: "Experience",
         namedStyleType: "NORMAL_TEXT",

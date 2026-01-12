@@ -55,8 +55,8 @@ describe("extractParagraphText", () => {
     const paragraph: docs_v1.Schema$Paragraph = {
       elements: [
         { textRun: { content: "Start" } },
-        { inlineObjectElement: {} }, // Should be ignored
-        { textRun: {} }, // Undefined content
+        { inlineObjectElement: {} },
+        { textRun: {} },
         { textRun: { content: "End" } },
       ],
     };
@@ -165,7 +165,7 @@ describe("splitAndTrim", () => {
 
   it("should keep empty strings when filterEmpty is false (default)", () => {
     // Arrange
-    const text = "A,,B"; // Missing value in between
+    const text = "A,,B";
 
     // Act
     const result = splitAndTrim(text, ",", false);
@@ -176,7 +176,7 @@ describe("splitAndTrim", () => {
 
   it("should remove empty strings when filterEmpty is true", () => {
     // Arrange
-    const text = "A, ,B"; // Empty value with space
+    const text = "A, ,B";
 
     // Act
     const result = splitAndTrim(text, ",", true);
@@ -264,7 +264,7 @@ describe("Specific Parsing Functions", () => {
     });
 
     it("should fill missing values with empty strings", () => {
-      const text = "Google | Engineer"; // year is missing
+      const text = "Google | Engineer";
       expect(parseToFields(text, keys, "|")).toEqual({
         company: "Google",
         role: "Engineer",
@@ -273,7 +273,7 @@ describe("Specific Parsing Functions", () => {
     });
 
     it("should maintain empty strings for explicit gaps to preserve order", () => {
-      const text = "Google || 2023"; // role is explicitly empty
+      const text = "Google || 2023";
       expect(parseToFields(text, keys, "|")).toEqual({
         company: "Google",
         role: "",
@@ -388,7 +388,7 @@ describe("parseStructuredText", () => {
     });
 
     it("should prioritize Keyed List over Fields if both are configured", () => {
-      // Arrange: Schema has both keyDelimiter (Priority 1) and keys (Priority 2)
+      // Arrange
       const mixedSchema: Title = {
         namedStyleType: "NORMAL_TEXT",
         keyDelimiter: ":",
@@ -400,7 +400,7 @@ describe("parseStructuredText", () => {
       const text = "Company: Google, Engineer";
       const result = parseStructuredText(text, mixedSchema);
 
-      // Assert: Should use Keyed List logic
+      // Assert
       expect(result).toEqual({
         key: "Company",
         value: ["Google", "Engineer"],

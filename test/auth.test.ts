@@ -8,7 +8,6 @@ import { google } from "googleapis";
 // ======================================================================
 vi.mock("google-auth-library", () => {
   return {
-    // Ensure the mock is a standard function to support 'new' instantiation
     GoogleAuth: vi.fn().mockImplementation(function () {}),
   };
 });
@@ -32,11 +31,8 @@ describe("createDocsClient", () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    // Note: clearAllMocks clears call history but NOT implementations.
-    // Specific implementations must be reset or defined per test.
     vi.clearAllMocks();
 
-    // Spy on console.error to verify logs without cluttering the test output
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
@@ -114,15 +110,12 @@ describe("createDocsClient", () => {
       // Arrange
       const originalError = new Error("Invalid API options");
 
-      // [FIX]: Ensure GoogleAuth succeeds for this test so we reach the google.docs call.
-      // Without this, the 'throw' from the previous test is still active.
       (GoogleAuth as unknown as ReturnType<typeof vi.fn>).mockImplementation(
         function () {
           return {};
         }
       );
 
-      // Mock google.docs to fail
       (google.docs as unknown as ReturnType<typeof vi.fn>).mockImplementation(
         () => {
           throw originalError;

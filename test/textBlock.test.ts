@@ -46,7 +46,6 @@ describe("parseTextBlockSection", () => {
 
       const paragraphs = [
         createMockParagraph({ text: "Hello" }).paragraph,
-        // This paragraph matches the 'Next Section' schema, so parsing should stop BEFORE this.
         createMockParagraph({
           text: "Next Section",
           namedStyleType: "HEADING_2",
@@ -64,7 +63,6 @@ describe("parseTextBlockSection", () => {
 
     it("should stop collecting when any paragraph heading (e.g., H3) is encountered", () => {
       // Arrange
-      // Even without a schema definition, headings act as natural boundaries for text blocks.
       const paragraphs = [
         createMockParagraph({ text: "Hello" }).paragraph,
         createMockParagraph({
@@ -91,8 +89,6 @@ describe("parseTextBlockSection", () => {
         sections: [sectionSchema],
       };
 
-      // This paragraph is BOTH a heading and a new section start.
-      // The cursor should identify it as a new section first.
       const paragraphs = [
         createMockParagraph({
           text: "Skills",
@@ -114,7 +110,7 @@ describe("parseTextBlockSection", () => {
       // Arrange
       const paragraphs = [
         createMockParagraph({ text: "Hello" }).paragraph,
-        createMockParagraph({ text: "" }).paragraph, // Empty text
+        createMockParagraph({ text: "" }).paragraph,
         createMockParagraph({ text: "World" }).paragraph,
       ];
       const cursor = new ParagraphCursor(paragraphs, dummySchema);
@@ -123,7 +119,6 @@ describe("parseTextBlockSection", () => {
       const result = parseTextBlockSection(cursor);
 
       // Assert
-      // Assumes implementation handles empty strings gracefully (e.g. implicitly via join or ignoring)
       expect(result).toBe("Hello World");
     });
 

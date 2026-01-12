@@ -58,7 +58,7 @@ describe("getParsedDocument - API & Error Handling", () => {
     const schema: ParseSchema = {
       sections: [{ title: { name: "Intro", namedStyleType: "HEADING_2" } }],
     };
-    const doc = createMockDocument([]); // Empty body
+    const doc = createMockDocument([]);
     mockDocsGet.mockResolvedValue({ data: doc });
 
     // Act
@@ -88,7 +88,6 @@ describe("getParsedDocument - Section Resolution", () => {
         { title: { name: "EXPERIENCE", namedStyleType: "HEADING_2" } },
       ],
     };
-    // Document uses lowercase "experience"
     const doc = createMockDocument([
       createMockParagraph({ text: "experience", namedStyleType: "HEADING_2" }),
       createMockParagraph({
@@ -101,7 +100,7 @@ describe("getParsedDocument - Section Resolution", () => {
     // Act
     const result = await getParsedDocument("doc-case-insensitive", schema);
 
-    // Assert: The key in the result should match the schema's defined name ("EXPERIENCE")
+    // Assert
     expect(result).toEqual({
       EXPERIENCE: "Worked at Google",
     });
@@ -484,7 +483,6 @@ describe("getParsedDocument - Mode: Tree", () => {
       createMockParagraph({ text: "Team A", namedStyleType: "HEADING_3" }),
       createMockParagraph({ text: "Squad 1", namedStyleType: "HEADING_4" }),
       createMockParagraph({ text: "Work", namedStyleType: "NORMAL_TEXT" }),
-      // "Team B" is H3, so it should close "Squad 1" (H4) and "Team A" (H3)
       createMockParagraph({ text: "Team B", namedStyleType: "HEADING_3" }),
     ]);
     mockDocsGet.mockResolvedValue({ data: doc });
@@ -504,14 +502,14 @@ describe("getParsedDocument - Mode: Tree", () => {
         },
         {
           title: "Team B",
-          content: [], // No H4 children
+          content: [],
         },
       ],
     });
   });
 
   it("should ignore content that appears before the first defined root node", async () => {
-    // Arrange: Tree expects H3 as root
+    // Arrange
     const schema: ParseSchema = {
       sections: [
         {
@@ -531,7 +529,7 @@ describe("getParsedDocument - Mode: Tree", () => {
       createMockParagraph({
         text: "Orphan Text",
         namedStyleType: "NORMAL_TEXT",
-      }), // Should be skipped
+      }),
       createMockParagraph({ text: "Job A", namedStyleType: "HEADING_3" }),
       createMockParagraph({ text: "Desc", namedStyleType: "NORMAL_TEXT" }),
     ]);
@@ -564,24 +562,19 @@ describe("getParsedDocument - Robustness", () => {
       sections: [{ title: { name: "Test", namedStyleType: "HEADING_2" } }],
     };
 
-    // Manual construction of mixed content
     const rawDoc = {
       body: {
         content: [
           createMockParagraph({ text: "Test", namedStyleType: "HEADING_2" })
-            .paragraph, // Wait, createMockParagraph returns { paragraph } or element?
-          // Using helper properly inside the array construction (helper returns object with paragraph key)
-          // Let's assume the mockDocsGet returns the full object structure.
-          // Note: createMockParagraph returns { paragraph: ... }, we need the full StructuralElement structure for the array.
-          // Let's just mock the array directly for this test to be safe.
+            .paragraph,
           {
             paragraph: {
               elements: [{ textRun: { content: "Test" } }],
               paragraphStyle: { namedStyleType: "HEADING_2" },
             },
           },
-          { table: { tableRows: [] } }, // Table
-          { sectionBreak: {} }, // Section Break
+          { table: { tableRows: [] } },
+          { sectionBreak: {} },
           {
             paragraph: {
               elements: [{ textRun: { content: "Content" } }],
@@ -601,7 +594,7 @@ describe("getParsedDocument - Robustness", () => {
   });
 
   it("should stop parsing a section if an unexpected Heading level is encountered (Schema Mismatch)", async () => {
-    // Arrange: Schema expects H3, but document has H5
+    // Arrange
     const schema: ParseSchema = {
       sections: [
         {
@@ -620,7 +613,6 @@ describe("getParsedDocument - Robustness", () => {
       createMockParagraph({ text: "Skills", namedStyleType: "HEADING_2" }),
       createMockParagraph({ text: "Core", namedStyleType: "HEADING_3" }),
       createMockParagraph({ text: "- JS", namedStyleType: "NORMAL_TEXT" }),
-      // H5 is not in the tree definition, so it should break the sequence/stop the current block
       createMockParagraph({ text: "Deep Detail", namedStyleType: "HEADING_5" }),
     ]);
     mockDocsGet.mockResolvedValue({ data: doc });
@@ -702,14 +694,11 @@ describe("getParsedDocument - Enhanced Coverage", () => {
   });
 
   it("should handle a document with an undefined body safely", async () => {
-    // Rationale: Tests `const content = doc.body?.content || [];` in parser.ts
     // Arrange
     const schema: ParseSchema = { sections: [] };
-    // Manually create a doc object without a body property
     const rawDoc = {
       documentId: "no-body-doc",
       title: "Untitled",
-      // body is undefined
     };
     mockDocsGet.mockResolvedValue({ data: rawDoc });
 
@@ -721,13 +710,11 @@ describe("getParsedDocument - Enhanced Coverage", () => {
   });
 
   it("should ignore non-paragraph elements (e.g., images/tables only) in the content stream", async () => {
-    // Rationale: Tests `.filter((paragraph) => !!paragraph)` in validParagraphList construction
     // Arrange
     const schema: ParseSchema = {
       sections: [{ title: { name: "Intro", namedStyleType: "HEADING_2" } }],
     };
 
-    // Construct content with ONLY non-paragraph elements
     const rawDoc = {
       body: {
         content: [
@@ -747,9 +734,6 @@ describe("getParsedDocument - Enhanced Coverage", () => {
   });
 
   it("should correctly parse sections regardless of the order defined in the Schema", async () => {
-    // Rationale: Ensures parseDocument iterates based on Cursor (Document), not Schema array order.
-    // Arrange
-    // Schema defines "Part B" BEFORE "Part A"
     const schema: ParseSchema = {
       sections: [
         { title: { name: "Part B", namedStyleType: "HEADING_2" } },
@@ -757,7 +741,6 @@ describe("getParsedDocument - Enhanced Coverage", () => {
       ],
     };
 
-    // Document has "Part A" then "Part B"
     const doc = createMockDocument([
       createMockParagraph({ text: "Part A", namedStyleType: "HEADING_2" }),
       createMockParagraph({ text: "Content A", namedStyleType: "NORMAL_TEXT" }),
@@ -777,16 +760,13 @@ describe("getParsedDocument - Enhanced Coverage", () => {
   });
 
   it("should NOT treat text matching a section title as a new section if the style does not match", async () => {
-    // Rationale: Verifies that Section matching relies on Style + Text, not just Text.
     // Arrange
     const schema: ParseSchema = {
       sections: [{ title: { name: "Overview", namedStyleType: "HEADING_2" } }],
     };
 
     const doc = createMockDocument([
-      // Real Section Start
       createMockParagraph({ text: "Overview", namedStyleType: "HEADING_2" }),
-      // This text matches the title but is NORMAL_TEXT. It should be part of the content.
       createMockParagraph({ text: "Overview", namedStyleType: "NORMAL_TEXT" }),
       createMockParagraph({
         text: "is important.",
@@ -799,14 +779,11 @@ describe("getParsedDocument - Enhanced Coverage", () => {
     const result = await getParsedDocument("doc-false-positive-title", schema);
 
     // Assert
-    // If logic was wrong, it might reset the section or ignore the second "Overview".
-    // Correct behavior: "Overview is important." (concatenated)
     expect(result).toEqual({
       Overview: "Overview is important.",
     });
   });
   it("should handle unexpected errors that are not Error instances (Branch Coverage)", async () => {
-    // Rationale: Tests the 'else' branch of `e instanceof Error ? e.message : String(e)`
     // Arrange
     const schema: ParseSchema = { sections: [] };
     mockDocsGet.mockRejectedValue("String Error Message");
@@ -818,7 +795,6 @@ describe("getParsedDocument - Enhanced Coverage", () => {
   });
 
   it("should skip sections found by cursor but not present in schema (Branch Coverage)", async () => {
-    // Rationale: Tests the 'if (section)' check when it evaluates to false
     // Arrange
     const schema: ParseSchema = {
       sections: [{ title: { name: "Wanted", namedStyleType: "HEADING_2" } }],

@@ -82,8 +82,8 @@ describe("parseListSection", () => {
       const paragraphs = [
         createMockParagraph({ text: "Item A" }).paragraph,
         createMockParagraph({ text: "Next", namedStyleType: "HEADING_2" })
-          .paragraph, // New Section
-        createMockParagraph({ text: "Item B" }).paragraph, // Should be ignored
+          .paragraph,
+        createMockParagraph({ text: "Item B" }).paragraph,
       ];
       const cursor = new ParagraphCursor(paragraphs, multiSectionSchema);
 
@@ -99,7 +99,7 @@ describe("parseListSection", () => {
       const paragraphs = [
         createMockParagraph({ text: "Item 1" }).paragraph,
         createMockParagraph({ text: "Unexpected", namedStyleType: "HEADING_3" })
-          .paragraph, // Unexpected Heading
+          .paragraph,
         createMockParagraph({ text: "Item 2" }).paragraph,
       ];
       const cursor = new ParagraphCursor(paragraphs, multiSectionSchema);
@@ -137,7 +137,6 @@ describe("parseListSection", () => {
   describe("Complex Structures", () => {
     it("should NOT flatten if the parsed result is an object (Keyed List), even if isFlatten is true", () => {
       // Arrange
-      // Configuration asks to flatten, but KeyedList returns objects, not arrays.
       const sectionSchema: Section = {
         title: { name: "Mixed", namedStyleType: "HEADING_2" },
         content: { kind: "list", keyDelimiter: ":", isFlatten: true },
@@ -149,7 +148,7 @@ describe("parseListSection", () => {
       // Act
       const result = parseListSection(cursor, sectionSchema);
 
-      // Assert: Objects cannot be spread (...) so they are pushed as-is.
+      // Assert
       expect(result).toEqual([{ key: "Lang", value: ["JS"] }]);
     });
 
@@ -194,8 +193,8 @@ describe("parseListSection", () => {
     it("should skip empty paragraphs (null info) and continue parsing", () => {
       // Arrange
       const paragraphs = [
-        createMockParagraph({ text: "" }).paragraph, // Empty (returns null info)
-        createMockParagraph({ text: "Item A" }).paragraph, // Valid
+        createMockParagraph({ text: "" }).paragraph,
+        createMockParagraph({ text: "Item A" }).paragraph,
       ];
       const cursor = new ParagraphCursor(paragraphs, dummySchema);
 
@@ -214,7 +213,7 @@ describe("parseListSection", () => {
       // Act
       const result = parseListSection(cursor, listSchema);
 
-      // Assert: Received was [], which means empty strings are filtered out correctly.
+      // Assert
       expect(result).toEqual([]);
     });
 
@@ -233,7 +232,7 @@ describe("parseListSection", () => {
       // Arrange
       const invalidSectionSchema: Section = {
         title: { name: "Oops", namedStyleType: "HEADING_2" },
-        content: { kind: "tree" } as Content, // Wrong kind
+        content: { kind: "tree" } as Content,
       };
       const paragraphs = [createMockParagraph({ text: "Item" }).paragraph];
       const cursor = new ParagraphCursor(paragraphs, dummySchema);
