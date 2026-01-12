@@ -34,6 +34,14 @@
   ],
   "author": "Yuji Min <yuji.min.dev@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nvrtmd/google-docs-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nvrtmd/google-docs-parser/issues"
+  },
+  "homepage": "https://github.com/nvrtmd/google-docs-parser#readme",
   "publishConfig": {
     "access": "public"
   },
