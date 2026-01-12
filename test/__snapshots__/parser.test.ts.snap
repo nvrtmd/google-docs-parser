@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getParsedDocument - Snapshots > should match snapshot for a comprehensive resume document 1`] = `
+{
+  "Experience": [
+    {
+      "content": [
+        "- Built UI",
+      ],
+      "title": {
+        "company": "Tech Corp | Senior Dev",
+        "role": "",
+      },
+    },
+  ],
+  "Profile": "Frontend Developer.",
+}
+`;
