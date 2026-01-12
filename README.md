@@ -1,7 +1,7 @@
 # 📄 Google Docs Parser
 
 <h1 align="center">
-	<img width="500px" src="media/logo.png" alt="octoreport">
+	<img width="300px" src="media/logo.png" alt="octoreport">
 </h1>
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)
