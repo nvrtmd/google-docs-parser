@@ -1,0 +1,57 @@
+{
+  "name": "@yuji.min/google-docs-parser",
+  "version": "1.0.0",
+  "description": "Turn your Google Docs into a Headless CMS. A strictly typed, schema-based parser for Google Docs.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "google-docs",
+    "parser",
+    "schema",
+    "cms",
+    "typescript"
+  ],
+  "author": "Yuji Min <yuji.min.dev@gmail.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "google-auth-library": "^9.0.0 || ^10.0.0",
+    "googleapis": "^126.0.0 || ^140.0.0 || ^164.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.6",
+    "@vitest/coverage-v8": "^4.0.17",
+    "google-auth-library": "^10.5.0",
+    "googleapis": "^170.0.0",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
