@@ -11,7 +11,7 @@
 
 **Turn your Google Docs into a Headless CMS.**
 
-`@yuji-min/google-docs-parser` is a TypeScript library that transforms raw Google Docs content into structured JSON data based on a user-defined schema. Stop wrestling with the raw Google Docs API structure—define your schema and get clean data instantly.
+`google-docs-parser` is a TypeScript library that transforms raw Google Docs content into structured JSON data based on a user-defined schema. Stop wrestling with the raw Google Docs API structure—define your schema and get clean data instantly.
 
 ---
 
