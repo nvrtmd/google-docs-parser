@@ -1,5 +1,5 @@
 {
-  "name": "@yuji.min/google-docs-parser",
+  "name": "@yuji-min/google-docs-parser",
   "version": "1.0.0",
   "description": "Turn your Google Docs into a Headless CMS. A strictly typed, schema-based parser for Google Docs.",
   "type": "module",
