@@ -166,11 +166,14 @@ type NodeContentItems<C extends Content | undefined> = C extends {
 /**
  * Helper Type: Represents the fully resolved type of a single Node.
  *
- * Merges:
- * 1. The parsed fields from the Node's **Title** (if it has `keys`).
- * 2. The parsed `content` property (children or list).
+ * Structure:
+ * - `title`: The parsed title (string, object with keys, or keyed list).
+ * - `content`: The parsed body content (children nodes or list items).
+ *
+ * This matches the runtime structure: `{ title: ..., content: [...] }`.
  */
-export type StructuredItem<N extends Node> = ItemField<N["title"]> & {
+export type StructuredItem<N extends Node> = {
+  title: ItemField<N["title"]>;
   content: NodeContentItems<N["content"]>;
 };
 
