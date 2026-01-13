@@ -156,6 +156,7 @@ async function main() {
     console.log(JSON.stringify(data, null, 2));
 
     // ✅ Full type inference - no manual types needed
+    console.log(data.Profile); // string: "Senior Software Engineer..."
     const firstJob = data.Experience[0];
     console.log(firstJob.title.company); // "Tech Corp"
     console.log(firstJob.title.role); // "Backend Lead"

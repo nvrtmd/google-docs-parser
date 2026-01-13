@@ -137,15 +137,21 @@ type ItemField<T extends Schema> = T extends {
   : string;
 
 /**
+ * Helper Type: Represents a keyed list item (parsed from "Key: Value" format).
+ */
+type KeyedListItem = { key: string; value: string[] };
+
+/**
  * Helper Type: Infers the result type for a `List` content.
  *
- * - If the schema has keys, returns an array of objects.
+ * - If `keys` is defined, returns an array of mapped objects.
+ * - If `keyDelimiter` is defined, returns an array of `{ key, value }` objects.
  * - Otherwise, returns an array of strings.
  */
-type ContentListType<C extends List> = C extends {
-  keys: readonly any[];
-}
+type ContentListType<C extends List> = C extends { keys: readonly any[] }
   ? Array<ItemField<C>>
+  : C extends { keyDelimiter: string }
+  ? Array<KeyedListItem>
   : string[];
 
 /**
@@ -194,5 +200,5 @@ export type GetParsedType<T extends ParseSchema> = {
     ? Array<StructuredItem<N>>
     : S["content"] extends { kind: "list" }
     ? ContentListType<S["content"]>
-    : unknown;
+    : string; // Text block (content undefined) → always string
 };
