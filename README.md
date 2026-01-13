@@ -11,7 +11,7 @@
 
 **Turn your Google Docs into a Headless CMS.**
 
-`google-docs-parser` is a TypeScript library that transforms raw Google Docs content into structured JSON data based on a user-defined schema. Stop wrestling with the raw Google Docs API structure—define your schema and get clean data instantly.
+`google-docs-parser` is a TypeScript library that transforms raw Google Docs content into structured JSON data based on a user-defined schema. Stop wrestling with the raw Google Docs API structure—define your schema and get clean, **fully-typed** data instantly.
 
 ---
 
@@ -23,11 +23,12 @@ This library solves that complexity by allowing you to define a **Schema** that 
 
 ### ✨ Key Features
 
-- **Type-Safe:** The return type is automatically inferred from your schema configuration using TypeScript generics.
+- **100% Type-Safe:** Use `GetParsedType<typeof schema>` to infer the exact return type from your schema—no manual type definitions needed.
 - **Hierarchical Parsing:** Supports nested tree structures (e.g., _Heading 2_ containing _Heading 3_ children).
+- **Consistent Structure:** Tree nodes always follow `{ title, content }` pattern for predictable data access.
 - **Smart Text Parsing:** Built-in parsers for:
-  - Key-Value pairs (e.g., `Role: Engineer`)
-  - Delimited fields (e.g., `2024 | Senior Dev | Google`)
+  - Key-Value pairs (e.g., `Skills: React, TypeScript`)
+  - Delimited fields (e.g., `Engineer | Google | 2024`)
   - Flattened lists or grouped arrays.
 - **Auth Ready:** Seamless integration with `google-auth-library` and `googleapis`.
 
@@ -107,7 +108,11 @@ Imagine a Google Doc structured like a resume or project list:
 Create a schema object that mirrors the visual hierarchy of your document.
 
 ```typescript
-import { getParsedDocument, ParseSchema } from "@yuji-min/google-docs-parser";
+import {
+  getParsedDocument,
+  ParseSchema,
+  GetParsedType,
+} from "@yuji-min/google-docs-parser";
 
 // 1. Define the schema
 const resumeSchema = {
@@ -124,7 +129,7 @@ const resumeSchema = {
         kind: "tree", // This section is a hierarchical tree
         node: {
           // The tree nodes start with "Heading 2"
-          // We can also parse the heading text itself!
+          // Parse the heading text with delimiter & keys!
           title: {
             namedStyleType: "HEADING_2",
             keys: ["company", "role"],
@@ -136,16 +141,25 @@ const resumeSchema = {
       },
     },
   ],
-} as const; // 'as const' is CRITICAL for type inference
+} as const satisfies ParseSchema; // 'as const' is CRITICAL for type inference
 
-// 2. Fetch and Parse
+// 2. Infer the return type from schema (optional but recommended)
+type ResumeData = GetParsedType<typeof resumeSchema>;
+
+// 3. Fetch and Parse
 async function main() {
   const docId = "YOUR_GOOGLE_DOC_ID";
 
   try {
-    // 'data' is fully typed based on resumeSchema!
+    // 'data' is fully typed as ResumeData!
     const data = await getParsedDocument(docId, resumeSchema);
     console.log(JSON.stringify(data, null, 2));
+
+    // ✅ Full type inference - no manual types needed
+    const firstJob = data.Experience[0];
+    console.log(firstJob.title.company); // "Tech Corp"
+    console.log(firstJob.title.role); // "Backend Lead"
+    console.log(firstJob.content); // ["Designed microservices...", "Managed..."]
   } catch (error) {
     console.error(error);
   }
@@ -156,18 +170,18 @@ main();
 
 ### 3. The Result
 
+Tree nodes always have a consistent `{ title, content }` structure:
+
 ```json
 {
   "Profile": "Senior Software Engineer based in Seoul.",
   "Experience": [
     {
-      "company": "Tech Corp",
-      "role": "Backend Lead",
+      "title": { "company": "Tech Corp", "role": "Backend Lead" },
       "content": ["Designed microservices architecture", "Managed a team of 5"]
     },
     {
-      "company": "Startup Inc",
-      "role": "Full Stack",
+      "title": { "company": "Startup Inc", "role": "Full Stack" },
       "content": ["Built MVP in 3 months"]
     }
   ]
@@ -178,7 +192,7 @@ main();
 
 ## 📚 Parsing Schema Guide
 
-The `ParseSchema` object controls how the parser reads your document.
+The `ParseSchema` object controls how the parser reads your document. Use `GetParsedType<typeof schema>` to infer the exact TypeScript type from your schema.
 
 ### Section Configuration
 
@@ -194,20 +208,140 @@ The `ParseSchema` object controls how the parser reads your document.
 
 If `content` is undefined, the parser collects all paragraphs following the header until the next section starts, joining them into a single string.
 
+```typescript
+// Schema
+{ title: { name: "About", namedStyleType: "HEADING_1" } }
+
+// Inferred Type → string
+// Result → "Hello, I am a developer."
+```
+
 #### 2. List (`kind: "list"`)
 
 Parses paragraphs as an array. Useful for bullet points or simple lists.
 
-- **`isFlatten`**: (boolean) If true, merges multiple lines into a single flat array.
-- **`keyDelimiter`**: (string) Parses "Key: Value" lines into `{ key: "...", value: [...] }` objects.
-- **`delimiter`**: (string) Splits a line by a character (e.g., comma) into an array.
+| Option         | Type       | Description                                              |
+| :------------- | :--------- | :------------------------------------------------------- |
+| `isFlatten`    | `boolean`  | If true, merges multiple lines into a single flat array. |
+| `keyDelimiter` | `string`   | Parses `Key: Value` lines into `{ key, value }` objects. |
+| `keys`         | `string[]` | Maps delimited values to named fields.                   |
+| `delimiter`    | `string`   | Splits a line by a character (default: `,`).             |
+
+```typescript
+// Schema: Simple list
+{ content: { kind: "list" } }
+// Inferred Type → string[]
+// Result → ["Item 1", "Item 2", "Item 3"]
+
+// Schema: Keyed list (Key: Value format)
+{ content: { kind: "list", keyDelimiter: ":", delimiter: "," } }
+// Inferred Type → { key: string; value: string[] }[]
+// Result → [{ key: "Skills", value: ["React", "TypeScript"] }]
+
+// Schema: Mapped fields
+{ content: { kind: "list", keys: ["school", "degree"], delimiter: "|" } }
+// Inferred Type → { school: string; degree: string }[]
+// Result → [{ school: "MIT", degree: "B.S. Computer Science" }]
+```
 
 #### 3. Tree (`kind: "tree"`)
 
-Parses hierarchical structures. Ideal for nested sections like "H2 -> H3 -> Content".
+Parses hierarchical structures. Ideal for nested sections like "H2 → H3 → Content".
 
 - **`node`**: Defines the schema for the child nodes.
-- **Strict Nesting**: The parser automatically stops collecting children when it encounters a heading of the same or higher level (e.g., an H2 stops an open H2 block).
+- **Strict Nesting**: The parser automatically stops collecting children when it encounters a heading of the same or higher level.
+
+**Tree nodes always have a consistent `{ title, content }` structure:**
+
+```typescript
+// Schema
+{
+  content: {
+    kind: "tree",
+    node: {
+      title: {
+        namedStyleType: "HEADING_2",
+        keys: ["role", "company"],
+        delimiter: "|"
+      },
+      content: { kind: "list" }
+    }
+  }
+}
+
+// Inferred Type
+// {
+//   title: { role: string; company: string };
+//   content: string[];
+// }[]
+
+// Result
+[
+  {
+    "title": { "role": "Engineer", "company": "Google" },
+    "content": ["Built APIs", "Led team"]
+  }
+]
+```
+
+### Title Parsing Options
+
+The `title` field in tree nodes can be parsed in three ways:
+
+| Configuration        | Title Type                         | Access Pattern                       |
+| :------------------- | :--------------------------------- | :----------------------------------- |
+| No options           | `string`                           | `node.title`                         |
+| `keys` + `delimiter` | `{ [key]: string }`                | `node.title.role`                    |
+| `keyDelimiter`       | `{ key: string; value: string[] }` | `node.title.key`, `node.title.value` |
+
+---
+
+## 🔮 Type Inference with `GetParsedType`
+
+The library provides `GetParsedType<T>` utility type that infers the exact return type from your schema:
+
+```typescript
+import type { ParseSchema, GetParsedType } from "@yuji-min/google-docs-parser";
+
+const schema = {
+  sections: [
+    { title: { name: "Bio", namedStyleType: "HEADING_1" } },
+    {
+      title: { name: "Skills", namedStyleType: "HEADING_1" },
+      content: { kind: "list", keyDelimiter: ":", delimiter: "," },
+    },
+    {
+      title: { name: "Career", namedStyleType: "HEADING_1" },
+      content: {
+        kind: "tree",
+        node: {
+          title: {
+            namedStyleType: "HEADING_2",
+            keys: ["role", "company", "period"],
+            delimiter: "|",
+          },
+          content: { kind: "list" },
+        },
+      },
+    },
+  ],
+} as const satisfies ParseSchema;
+
+// ✅ Fully inferred type - no manual interfaces needed!
+type MyData = GetParsedType<typeof schema>;
+
+// Equivalent to:
+// {
+//   Bio: string;
+//   Skills: { key: string; value: string[] }[];
+//   Career: {
+//     title: { role: string; company: string; period: string };
+//     content: string[];
+//   }[];
+// }
+```
+
+> **Note:** Always use `as const satisfies ParseSchema` for accurate type inference.
 
 ---
 
