@@ -1,6 +1,6 @@
 {
   "name": "@yuji-min/google-docs-parser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Turn your Google Docs into a Headless CMS. A strictly typed, schema-based parser for Google Docs.",
   "type": "module",
   "main": "./dist/index.cjs",
