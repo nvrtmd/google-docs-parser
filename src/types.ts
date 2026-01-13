@@ -127,26 +127,26 @@ export type ParsedDocument = Record<string, unknown>;
 /**
  * Helper Type: Infers the object shape for a single text item based on `keys`.
  *
- * - If `keys` are present (e.g., `["role", "name"]`), infers `{ role: unknown; name: unknown }`.
- * - Otherwise, infers `unknown` (typically a string).
+ * - If `keys` are present (e.g., `["role", "name"]`), infers `{ role: string; name: string }`.
+ * - Otherwise, infers `string`.
  */
 type ItemField<T extends Schema> = T extends {
   keys: readonly (infer K)[];
 }
-  ? { [P in K & string]: unknown }
-  : unknown;
+  ? { [P in K & string]: string }
+  : string;
 
 /**
  * Helper Type: Infers the result type for a `List` content.
  *
  * - If the schema has keys, returns an array of objects.
- * - Otherwise, returns an array of raw values.
+ * - Otherwise, returns an array of strings.
  */
 type ContentListType<C extends List> = C extends {
   keys: readonly any[];
 }
   ? Array<ItemField<C>>
-  : Array<unknown>;
+  : string[];
 
 /**
  * Helper Type: Recursively infers the type of a Node's content.
