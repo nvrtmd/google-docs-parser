@@ -1,4 +1,5 @@
-import { google, docs_v1 } from "googleapis";
+import { google } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { GoogleAuth } from "google-auth-library";
 
 /**

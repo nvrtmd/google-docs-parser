@@ -1,4 +1,4 @@
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 
 /**
  * Creates a mock `StructuralElement` containing a `Paragraph`, primarily for testing purposes.
@@ -24,12 +24,12 @@ export function createMockParagraph(params: {
   const paragraph: docs_v1.Schema$Paragraph = {
     elements: text
       ? [
-          {
-            textRun: {
-              content: text,
-            },
+        {
+          textRun: {
+            content: text,
           },
-        ]
+        },
+      ]
       : [],
     paragraphStyle: namedStyleType ? { namedStyleType } : {},
   };

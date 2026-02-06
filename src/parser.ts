@@ -1,4 +1,4 @@
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { ParsedDocument, ParseSchema, GetParsedType } from "./types";
 import { ParagraphCursor } from "./cursor";
 import { parseSectionContent } from "./section";

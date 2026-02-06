@@ -36,15 +36,32 @@ This library solves that complexity by allowing you to define a **Schema** that 
 
 ## 📦 Installation
 
+### Node.js / Traditional Environments
+
 ```bash
 npm install @yuji-min/google-docs-parser googleapis google-auth-library
 # or
 yarn add @yuji-min/google-docs-parser googleapis google-auth-library
 ```
 
+### Edge Runtime (Cloudflare Workers, Vercel Edge, etc.)
+
+```bash
+npm install @yuji-min/google-docs-parser
+# or
+yarn add @yuji-min/google-docs-parser
+```
+
+> **Note:** The Edge Runtime version (`/edge`) does **not** require `googleapis` or `google-auth-library` dependencies. It uses native Web APIs (Fetch, Web Crypto) instead.
+
 ---
 
 ## 🔑 Authentication & Setup
+
+This library supports two runtime environments with different authentication approaches:
+
+- **Node.js**: Uses `googleapis` and `google-auth-library` (traditional approach)
+- **Edge Runtime**: Uses native Web APIs with JSON credentials (Cloudflare Workers, Vercel Edge, etc.)
 
 To use this library, you need a Google Cloud Service Account with access to the Google Docs API.
 
@@ -57,6 +74,8 @@ To use this library, you need a Google Cloud Service Account with access to the 
 5.  Create and download a **JSON key** for this service account.
 
 ### 2. Configure Environment Variable
+
+#### Node.js (File Path)
 
 Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the path of your downloaded JSON key file.
 
@@ -73,6 +92,34 @@ $env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\your\service-account-key.json"
 ```
 
 > **Note:** The library uses `google-auth-library` internally, which automatically looks for credentials at the path defined in this environment variable.
+
+#### Edge Runtime (JSON String)
+
+For Edge Runtime environments, set `GOOGLE_APPLICATION_CREDENTIALS` to the **JSON string** (not a file path):
+
+**Cloudflare Workers (wrangler.toml):**
+
+```toml
+[vars]
+GOOGLE_APPLICATION_CREDENTIALS = '''
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  "private_key_id": "key-id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+  "client_email": "your-service-account@project.iam.gserviceaccount.com",
+  "client_id": "123456789",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/..."
+}
+'''
+```
+
+**Vercel Edge Functions:**
+
+Add the JSON as an environment variable in your Vercel project settings, or use `.env.local` during development.
 
 ### 3. Share the Document (Important!)
 
@@ -188,6 +235,99 @@ Tree nodes always have a consistent `{ title, content }` structure:
   ]
 }
 ```
+
+---
+
+## ☁️ Edge Runtime Usage
+
+The `/edge` export is specifically designed for Edge Runtime environments like Cloudflare Workers and Vercel Edge Functions.
+
+### Cloudflare Workers Example
+
+```typescript
+import { getParsedDocument } from "@yuji-min/google-docs-parser/edge";
+import type { ParseSchema } from "@yuji-min/google-docs-parser/edge";
+
+const schema = {
+  sections: [
+    { title: { name: "Profile", namedStyleType: "HEADING_1" } },
+    {
+      title: { name: "Experience", namedStyleType: "HEADING_1" },
+      content: {
+        kind: "tree",
+        node: {
+          title: {
+            namedStyleType: "HEADING_2",
+            keys: ["company", "role"],
+            delimiter: "|",
+          },
+          content: { kind: "list" },
+        },
+      },
+    },
+  ],
+} as const satisfies ParseSchema;
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    // Set credentials from environment variable
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = env.GOOGLE_CREDENTIALS;
+
+    const docId = "YOUR_GOOGLE_DOC_ID";
+
+    try {
+      const data = await getParsedDocument(docId, schema);
+      return Response.json(data);
+    } catch (error) {
+      return Response.json(
+        { error: error instanceof Error ? error.message : "Unknown error" },
+        { status: 500 }
+      );
+    }
+  },
+};
+```
+
+### Vercel Edge Functions Example
+
+```typescript
+// app/api/docs/route.ts
+import { getParsedDocument } from "@yuji-min/google-docs-parser/edge";
+import type { ParseSchema } from "@yuji-min/google-docs-parser/edge";
+
+export const runtime = "edge";
+
+const schema = {
+  /* your schema */
+} as const satisfies ParseSchema;
+
+export async function GET(request: Request) {
+  // Credentials are automatically loaded from process.env.GOOGLE_APPLICATION_CREDENTIALS
+  const docId = "YOUR_GOOGLE_DOC_ID";
+
+  try {
+    const data = await getParsedDocument(docId, schema);
+    return Response.json(data);
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Key Differences: Node.js vs Edge Runtime
+
+| Feature                    | Node.js (`/`)                       | Edge Runtime (`/edge`)              |
+| :------------------------- | :---------------------------------- | :---------------------------------- |
+| **Import Path**            | `@yuji-min/google-docs-parser`      | `@yuji-min/google-docs-parser/edge` |
+| **Dependencies**           | Requires `googleapis` + auth lib    | No external dependencies            |
+| **Credentials Format**     | File path or JSON string            | JSON string only                    |
+| **Authentication**         | `google-auth-library`               | Native Web Crypto API               |
+| **HTTP Client**            | `googleapis` client                 | Native `fetch`                      |
+| **Bundle Size**            | Larger (~400KB+)                    | Smaller (~16KB)                     |
+| **Supported Environments** | Node.js 18+                         | Cloudflare, Vercel Edge, Deno, etc. |
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "name": "@yuji-min/google-docs-parser",
   "version": "1.1.0",
-  "description": "Turn your Google Docs into a Headless CMS. A strictly typed, schema-based parser for Google Docs.",
+  "description": "Turn your Google Docs into a Headless CMS. A strictly typed, schema-based parser for Google Docs. Supports Node.js and Edge Runtime (Cloudflare Workers, Vercel Edge).",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -11,6 +11,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./edge": {
+      "types": "./dist/edge.d.ts",
+      "import": "./dist/edge.js",
+      "require": "./dist/edge.cjs"
     }
   },
   "files": [
@@ -30,7 +35,11 @@
     "parser",
     "schema",
     "cms",
-    "typescript"
+    "typescript",
+    "cloudflare-workers",
+    "edge-runtime",
+    "vercel-edge",
+    "headless-cms"
   ],
   "author": "Yuji Min <yuji.min.dev@gmail.com>",
   "license": "MIT",
@@ -48,6 +57,14 @@
   "peerDependencies": {
     "google-auth-library": "^9.0.0 || ^10.0.0",
     "googleapis": "^126.0.0 || ^140.0.0 || ^164.0.0"
+  },
+  "peerDependenciesMeta": {
+    "google-auth-library": {
+      "optional": true
+    },
+    "googleapis": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "^25.0.6",

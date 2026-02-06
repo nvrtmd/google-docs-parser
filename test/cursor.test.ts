@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { ParseSchema } from "../src/types";
 import { ParagraphCursor, getParagraph } from "../src/cursor";
 import { createMockParagraph } from "./helpers/factories";

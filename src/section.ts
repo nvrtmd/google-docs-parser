@@ -1,4 +1,4 @@
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { ParseSchema, Section, NamedStyleType } from "./types";
 import { hasNamedStyle } from "./utils";
 import { ParagraphCursor } from "./cursor";

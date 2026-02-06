@@ -1,6 +1,6 @@
 // text.test.ts
 import { describe, it, expect } from "vitest";
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { Section, ParseSchema } from "../src/types";
 import { ParagraphCursor } from "../src/cursor";
 import { parseTextBlockSection } from "../src/textBlock";

@@ -1,5 +1,3 @@
-import { docs_v1 } from "googleapis";
-
 // ----------------------------------------------------------------------
 // 1. Style & Base Configuration Structures
 // ----------------------------------------------------------------------
@@ -7,8 +5,21 @@ import { docs_v1 } from "googleapis";
 /**
  * Alias for the Google Docs API's named style type.
  * Examples: "HEADING_1", "HEADING_2", "NORMAL_TEXT", "TITLE".
+ *
+ * This type is compatible with googleapis docs_v1.Schema$ParagraphStyle["namedStyleType"]
+ * but defined independently to avoid googleapis dependency in Edge Runtime.
  */
-export type NamedStyleType = docs_v1.Schema$ParagraphStyle["namedStyleType"];
+export type NamedStyleType =
+  | "NORMAL_TEXT"
+  | "TITLE"
+  | "SUBTITLE"
+  | "HEADING_1"
+  | "HEADING_2"
+  | "HEADING_3"
+  | "HEADING_4"
+  | "HEADING_5"
+  | "HEADING_6"
+  | string; // Allow other custom styles for extensibility
 
 /**
  * Base configuration interface for parsing text content.

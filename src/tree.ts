@@ -1,4 +1,4 @@
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { NamedStyleType, Node, Section, Schema } from "./types";
 import { ParagraphCursor } from "./cursor";
 import { hasNamedStyle, parseStructuredText } from "./utils";
@@ -152,7 +152,7 @@ export function parseTreeSection(
     const { paragraph, style } = info;
 
     if (cursor.isAtNewSection()) break;
-    if (cursor.isAtParagraphHeading() && !allNodeTitleStyles.has(style)) break;
+    if (cursor.isAtParagraphHeading() && style && !allNodeTitleStyles.has(style)) break;
 
     if (hasNamedStyle(paragraph, nodeSchema.title.namedStyleType)) {
       return parseTreeNode(cursor, nodeSchema, [], allNodeTitleStyles);
@@ -200,7 +200,7 @@ export function parseTreeNode(
       return result;
     }
 
-    if (cursor.isAtParagraphHeading() && !allNodeTitleStyles.has(style)) {
+    if (cursor.isAtParagraphHeading() && style && !allNodeTitleStyles.has(style)) {
       return result;
     }
 

@@ -1,4 +1,4 @@
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { Schema, NamedStyleType } from "./types";
 import { VALID_NAMED_STYLES_SET } from "./constants";
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { docs_v1 } from "googleapis";
+import type { docs_v1 } from "googleapis";
 import { Title } from "../src/types";
 import {
   extractParagraphText,
